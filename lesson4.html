@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Lesson 4</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <h1>Lesson 4: First chart</h1>
+
+  <div style="height: 400px;">
+    <canvas id="myChart"></canvas>
+  </div>
+
+  <script>
+    const years = [0, 3, 6, 9, 12, 15];
+    const alpha = [100, 93.59, 88.65, 83.82, 79.2, 74.56];
+
+    new Chart(document.getElementById("myChart"), {
+      type: "line",
+      data: {
+        labels: years,
+        datasets: [
+          { label: "OEM Alpha", data: alpha, borderColor: "#2a78d6" }
+        ]
+      },
+      options: {
+        maintainAspectRatio: false
+      }
+    });
+  </script>
+
+</body>
+</html>

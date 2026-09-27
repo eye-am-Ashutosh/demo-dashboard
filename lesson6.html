@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Lesson 6</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <h1>Lesson 6: Vendor buttons</h1>
+
+  <button id="multiButton">Multi</button>
+  <button id="singleButton">Single</button>
+  <span id="modeText">Mode: multi</span>
+
+  <div id="vendorButtons"></div>
+
+  <div style="height: 400px;">
+    <canvas id="myChart"></canvas>
+  </div>
+
+  <script>
+    // ---------- the data ----------
+    const years = [0, 3, 6, 9, 12, 15];
+    const vendors = {
+      "OEM Alpha":     [100, 93.59, 88.65, 83.82, 79.2, 74.56],
+      "OEM Beta":      [100, 92.22, 86.76, 81.15, 75.9, 70.79],
+      "EPC Gamma":     [100, 91.58, 85.07, 78.96, 72.8, 66.62],
+      "Turnkey Delta": [100, 94.76, 90.65, 86.48, 82.07, 78.29]
+    };
+    const threshold = [100, 92.6, 87.5, 82.4, 77.3, 72.2];
+    const colors = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"];
+
+    // ---------- the state: what is switched on right now ----------
+    const names = Object.keys(vendors);
+    const selected = new Set(names);
+    let mode = "multi";
+
+    // ---------- build the chart ----------
+    const datasets = [];
+    for (let i = 0; i < names.length; i++) {
+      datasets.push({ label: names[i], data: vendors[names[i]], borderColor: colors[i] });
+    }
+    datasets.push({ label: "Threshold", data: threshold, borderColor: "gray", borderDash: [6, 5], isThreshold: true });
+
+    const chart = new Chart(document.getElementById("myChart"), {
+      type: "line",
+      data: { labels: years, datasets: datasets },
+      options: { maintainAspectRatio: false }
+    });
+
+    // ---------- make one button per vendor ----------
+    const buttonArea = document.getElementById("vendorButtons");
+    for (const name of names) {
+      const btn = document.createElement("button");
+      btn.textContent = name;
+      btn.onclick = () => clickVendor(name);
+      buttonArea.appendChild(btn);
+    }
+
+    // ---------- what happens on a click ----------
+    function clickVendor(name) {
+      if (mode === "single") {
+        selected.clear();
+        selected.add(name);
+      } else if (selected.has(name)) {
+        selected.delete(name);
+      } else {
+        selected.add(name);
+      }
+      update();
+    }
+
+    function setMode(newMode) {
+      mode = newMode;
+      document.getElementById("modeText").textContent = "Mode: " + mode;
+      if (mode === "single") {
+        const first = names.find(n => selected.has(n)) || names[0];
+        selected.clear();
+        selected.add(first);
+      }
+      update();
+    }
+
+    document.getElementById("multiButton").onclick = () => setMode("multi");
+    document.getElementById("singleButton").onclick = () => setMode("single");
+
+    // ---------- redraw from the state ----------
+    function update() {
+      for (const ds of chart.data.datasets) {
+        if (!ds.isThreshold) {
+          ds.hidden = !selected.has(ds.label);
+        }
+      }
+      chart.update();
+
+      for (const btn of buttonArea.children) {
+        btn.style.opacity = selected.has(btn.textContent) ? 1 : 0.35;
+      }
+    }
+  </script>
+
+</body>
+</html>

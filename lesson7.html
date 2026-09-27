@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Lesson 7</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <h1>Lesson 7: Reading Excel</h1>
+
+  <input type="file" id="fileInput" accept=".xlsx">
+  <h2 id="chartTitle">Pick an Excel file</h2>
+
+  <div style="height: 400px;">
+    <canvas id="myChart"></canvas>
+  </div>
+
+  <script>
+    const colors = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948"];
+    let chart = null;
+
+    // Turn Excel bytes into a chart
+    function drawFromExcel(bytes) {
+      const workbook = XLSX.read(bytes, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+      const headers = rows[0];
+      const dataRows = rows.slice(1);
+      const years = dataRows.map(row => row[0]);
+
+      const datasets = [];
+      let vendorCount = 0;
+      for (let col = 1; col < headers.length; col++) {
+        const name = String(headers[col]);
+        const values = dataRows.map(row => row[col]);
+
+        if (name.toLowerCase().startsWith("threshold")) {
+          datasets.push({ label: name, data: values, borderColor: "gray", borderDash: [6, 5] });
+        } else {
+          datasets.push({ label: name, data: values, borderColor: colors[vendorCount % colors.length] });
+          vendorCount = vendorCount + 1;
+        }
+      }
+
+      if (chart) {
+        chart.destroy();
+      }
+      chart = new Chart(document.getElementById("myChart"), {
+        type: "line",
+        data: { labels: years, datasets: datasets },
+        options: { maintainAspectRatio: false }
+      });
+      document.getElementById("chartTitle").textContent = sheetName;
+    }
+
+    // When a file is picked: read it, then draw it
+    const fileInput = document.getElementById("fileInput");
+    fileInput.onchange = async () => {
+      const file = fileInput.files[0];
+      const bytes = await file.arrayBuffer();
+      drawFromExcel(bytes);
+    };
+  </script>
+
+</body>
+</html>

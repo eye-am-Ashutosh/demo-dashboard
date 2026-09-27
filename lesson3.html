@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Lesson 3</title>
+</head>
+<body>
+
+  <h1>Lesson 3: JavaScript</h1>
+  <button id="checkButton">Check vendors</button>
+  <p id="output">Click the button.</p>
+
+  <script>
+    // 1. Variables
+    const threshold = 80;
+
+    // 2. Lists
+    const vendors = ["OEM Alpha", "OEM Beta", "EPC Gamma"];
+    const soh = [82.5, 79.3, 77.0];
+
+    // 3. A function with a loop and an if/else
+    function checkVendors() {
+      let message = "";
+      for (let i = 0; i < vendors.length; i++) {
+        if (soh[i] >= threshold) {
+          message = message + vendors[i] + ": ✓ above threshold<br>";
+        } else {
+          message = message + vendors[i] + ": ✕ below threshold<br>";
+        }
+      }
+      document.getElementById("output").innerHTML = message;
+    }
+
+    // 4. Run the function when the button is clicked
+    document.getElementById("checkButton").onclick = checkVendors;
+  </script>
+
+</body>
+</html>
